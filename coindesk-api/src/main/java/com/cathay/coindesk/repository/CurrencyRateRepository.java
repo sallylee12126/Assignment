@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CurrencyRateRepository extends JpaRepository<CurrencyRateEntity, Long> {
+public interface CurrencyRateRepository extends JpaRepository<CurrencyRateEntity, Integer> {
 
-    List<CurrencyRateEntity> findByCurrencyId(Long currencyId);
+    List<CurrencyRateEntity> findByCurrencyId(Integer currencyId);
 
     @Query("SELECT cr FROM CurrencyRateEntity cr WHERE cr.currencyId = :currencyId ORDER BY cr.updateTime DESC")
-    Optional<CurrencyRateEntity> findLatestByCurrencyId(@Param("currencyId") Long currencyId);
+    Optional<CurrencyRateEntity> findLatestByCurrencyId(@Param("currencyId") Integer currencyId);
 
     @Query("SELECT cr FROM CurrencyRateEntity cr ORDER BY cr.updateTime DESC")
     List<CurrencyRateEntity> findAllOrderByUpdateTimeDesc();

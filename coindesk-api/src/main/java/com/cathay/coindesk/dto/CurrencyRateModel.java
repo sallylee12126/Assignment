@@ -3,23 +3,23 @@ package com.cathay.coindesk.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class CurrencyRateDTO {
+public class CurrencyRateModel {
 
     private Integer id;
     private Integer currencyId;
     private LocalDateTime updateTime;
     private BigDecimal rate;
 
-    public CurrencyRateDTO() {}
+    public CurrencyRateModel() {}
 
-    public CurrencyRateDTO(Integer id, Integer currencyId, LocalDateTime updateTime, BigDecimal rate) {
+    public CurrencyRateModel(Integer id, Integer currencyId, LocalDateTime updateTime, BigDecimal rate) {
         this.id = id;
         this.currencyId = currencyId;
         this.updateTime = updateTime;
         this.rate = rate;
     }
 
-    public CurrencyRateDTO(Integer currencyId, LocalDateTime updateTime, BigDecimal rate) {
+    public CurrencyRateModel(Integer currencyId, LocalDateTime updateTime, BigDecimal rate) {
         this.currencyId = currencyId;
         this.updateTime = updateTime;
         this.rate = rate;

@@ -1,9 +1,6 @@
 package com.cathay.coindesk.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
@@ -11,7 +8,7 @@ import javax.validation.constraints.NotBlank;
  * 幣別資料
  */
 @Builder
-public class CurrencyDTO {
+public class CurrencyModel {
 
     private Integer id;
 
@@ -21,16 +18,16 @@ public class CurrencyDTO {
     @NotBlank(message = "Chinese name cannot be blank")
     private String chineseName;
 
-    public CurrencyDTO() {
+    public CurrencyModel() {
     }
 
-    public CurrencyDTO(Integer id, String code, String chineseName) {
+    public CurrencyModel(Integer id, String code, String chineseName) {
         this.id = id;
         this.code = code;
         this.chineseName = chineseName;
     }
 
-    public CurrencyDTO(String code, String chineseName) {
+    public CurrencyModel(String code, String chineseName) {
         this.code = code;
         this.chineseName = chineseName;
     }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CurrencyRepository extends JpaRepository<CurrencyEntity, Long> {
+public interface CurrencyRepository extends JpaRepository<CurrencyEntity, Integer> {
 
     Optional<CurrencyEntity> findByCode(String code);
 

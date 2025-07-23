@@ -3,7 +3,7 @@ package com.cathay.coindesk.service;
 import com.cathay.coindesk.api.data.ApiRsBody;
 import com.cathay.coindesk.api.data.impl.CoinDeskApiRs;
 import com.cathay.coindesk.dto.CoindeskResponseModel;
-import com.cathay.coindesk.dto.CurrencyDTO;
+import com.cathay.coindesk.dto.CurrencyModel;
 import com.cathay.coindesk.dto.TransformedResponseModel;
 import com.cathay.coindesk.error.code.CoinDeskErrorCode;
 import com.cathay.coindesk.exception.ActionException;
@@ -104,11 +104,14 @@ public class CoindeskService {
     }
 
     private String getCurrencyChineseName(String currencyCode) throws ActionException {
-        return currencyService.getCurrencyByCode(currencyCode)
-                .map(CurrencyDTO::getChineseName)
-                .filter(StringUtils::isNotBlank)
-                .orElseThrow(() -> CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_CH_ERROR,
-                        currencyCode));
+        CurrencyModel model = currencyService.getCurrencyByCode(currencyCode);
+        String name = model.getChineseName();
+
+        if (StringUtils.isBlank(name)) {
+            throw CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_CH_ERROR, currencyCode);
+        }
+
+        return name;
     }
 
 }
