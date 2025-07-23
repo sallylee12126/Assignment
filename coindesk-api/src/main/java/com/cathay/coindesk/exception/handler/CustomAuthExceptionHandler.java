@@ -1,4 +1,4 @@
-package com.cathay.coindesk.handler;
+package com.cathay.coindesk.exception.handler;
 
 import com.cathay.coindesk.controller.CoindeskController;
 import com.cathay.coindesk.controller.CurrencyController;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @CommonsLog
-@RestControllerAdvice(basePackageClasses = {CoindeskController.class, CurrencyController.class})
+//@RestControllerAdvice(basePackageClasses = {CoindeskController.class, CurrencyController.class})
 public class CustomAuthExceptionHandler {
 
 	/**

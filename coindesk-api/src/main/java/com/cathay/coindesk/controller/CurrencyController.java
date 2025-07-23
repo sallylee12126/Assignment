@@ -24,7 +24,7 @@ public class CurrencyController {
      * 查詢所有幣別
      */
     @GetMapping
-    public RestResult<List<CurrencyModel>> getAllCurrencies() {
+    public RestResult<List<CurrencyModel>> getAllCurrencies() throws ActionException {
         List<CurrencyModel> currencies = currencyService.getAllCurrencies();
         return new RestResult<>(RestStatus.SUCCESS, currencies);
     }

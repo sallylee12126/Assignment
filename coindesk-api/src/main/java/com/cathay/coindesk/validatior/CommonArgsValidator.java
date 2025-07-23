@@ -1,5 +1,6 @@
 package com.cathay.coindesk.validatior;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -22,19 +23,11 @@ public class CommonArgsValidator {
         }
     }
 
-    public static void notBlank(List<?> obj) {
+    public static void notBlank(Collection<?> obj) {
         notNull(obj);
 
-        if(obj.isEmpty()) {
-            Optional.ofNullable(obj).orElseThrow(() -> new IllegalArgumentException("list couldn't be empty"));
-        }
-    }
-
-    public static void notBlank(Set<?> obj) {
-        notNull(obj);
-
-        if(obj.isEmpty()) {
-            Optional.ofNullable(obj).orElseThrow(() -> new IllegalArgumentException("set couldn't be empty"));
+        if (obj.isEmpty()) {
+            throw new IllegalArgumentException("collection couldn't be empty");
         }
     }
 

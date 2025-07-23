@@ -30,9 +30,12 @@ public class CurrencyService {
     @Autowired
     private CurrencyRateRepository currencyRateRepository;
 
-    public List<CurrencyModel> getAllCurrencies() {
+    public List<CurrencyModel> getAllCurrencies() throws ActionException {
         List<CurrencyEntity> entities = currencyRepository.findAll();
-        CommonArgsValidator.notBlank(entities);
+
+        if (entities == null || entities.isEmpty()) {
+            throw CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_NOT_FOUND, "幣別資料");
+        }
 
         return entities.stream()
                 .map(this::convertToModel)
