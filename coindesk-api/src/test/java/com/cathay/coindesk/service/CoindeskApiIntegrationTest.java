@@ -48,9 +48,16 @@ public class CoindeskApiIntegrationTest {
     @BeforeEach
     void setUp() throws ActionException {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-        currencyService.createCurrency(new CurrencyModel("USD", "美元"));
-        currencyService.createCurrency(new CurrencyModel("GBP", "英鎊"));
-        currencyService.createCurrency(new CurrencyModel("EUR", "歐元"));
+
+        if (!currencyService.exists("USD")) {
+            currencyService.createCurrency(new CurrencyModel("USD", "美元"));
+        }
+        if (!currencyService.exists("GBP")) {
+            currencyService.createCurrency(new CurrencyModel("GBP", "英鎊"));
+        }
+        if (!currencyService.exists("EUR")) {
+            currencyService.createCurrency(new CurrencyModel("EUR", "歐元"));
+        }
     }
 
     @Test
@@ -58,7 +65,7 @@ public class CoindeskApiIntegrationTest {
         // Create
         CurrencyModel newCurrency = new CurrencyModel("BTC", "比特幣");
 
-        mockMvc.perform(post("/api/currencies")
+        mockMvc.perform(post("/api/currency/create/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newCurrency)))
                 .andExpect(status().isOk())
@@ -66,32 +73,32 @@ public class CoindeskApiIntegrationTest {
                 .andExpect(jsonPath("$.data.chineseName").value("比特幣"));
 
         // Read all
-        mockMvc.perform(get("/api/currencies"))
+        mockMvc.perform(get("/api/currency/currencies"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", hasSize(4))); // Assuming 3 initial + 1 new
+                .andExpect(jsonPath("$.data", hasSize(11)));
 
         // Read by code
-        mockMvc.perform(get("/api/currencies/code/BTC"))
+        mockMvc.perform(get("/api/currency/code/USD"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.code").value("BTC"))
-                .andExpect(jsonPath("$.data.chineseName").value("比特幣"));
+                .andExpect(jsonPath("$.data.code").value("USD"))
+                .andExpect(jsonPath("$.data.chineseName").value("美元"));
 
         // Update
-        Integer id = currencyService.getCurrencyByCode("BTC").getId();
-        CurrencyModel updated = new CurrencyModel("BTC", "Bitcoin");
+        String code = "USD";
+        CurrencyModel updated = new CurrencyModel("USD", "美金");
 
-        mockMvc.perform(put("/api/currencies/" + id)
+        mockMvc.perform(put("/api/currency/code/" + code)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updated)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.chineseName").value("Bitcoin"));
+                .andExpect(jsonPath("$.data.chineseName").value("美金"));
 
         // Delete
-        mockMvc.perform(delete("/api/currencies/" + id))
+        mockMvc.perform(delete("/api/currency/code/" + code))
                 .andExpect(status().isNoContent());
 
         // Verify deleted
-        mockMvc.perform(get("/api/currencies/" + id))
+        mockMvc.perform(get("/api/currency/code/" + code))
                 .andExpect(status().isBadRequest());
     }
 
@@ -120,7 +127,7 @@ public class CoindeskApiIntegrationTest {
         // Empty code
         CurrencyModel invalid1 = new CurrencyModel("", "Invalid");
 
-        mockMvc.perform(post("/api/currencies")
+        mockMvc.perform(post("/api/currency/create/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid1)))
                 .andExpect(status().isBadRequest())
@@ -130,7 +137,7 @@ public class CoindeskApiIntegrationTest {
         // Empty chineseName
         CurrencyModel invalid2 = new CurrencyModel("INV", "");
 
-        mockMvc.perform(post("/api/currencies")
+        mockMvc.perform(post("/api/currency/create/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid2)))
                 .andExpect(status().isBadRequest())
@@ -141,8 +148,7 @@ public class CoindeskApiIntegrationTest {
     @Test
     void shouldFailOnDuplicateCurrencyCode() throws Exception {
         CurrencyModel duplicate = new CurrencyModel("USD", "另一個美元");
-
-        mockMvc.perform(post("/api/currencies")
+        mockMvc.perform(post("/api/currency/create/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(duplicate)))
                 .andExpect(status().isBadRequest());

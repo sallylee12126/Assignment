@@ -62,7 +62,7 @@ public class CurrencyController {
     /**
      * 新增幣別
      */
-    @PostMapping
+    @PostMapping("/create")
     public RestResult<CurrencyModel> createCurrency(@Valid @RequestBody CurrencyModel currencyModel) throws ActionException {
         CurrencyModel createdCurrency = currencyService.createCurrency(currencyModel);
         return new RestResult<>(RestStatus.SUCCESS, createdCurrency);

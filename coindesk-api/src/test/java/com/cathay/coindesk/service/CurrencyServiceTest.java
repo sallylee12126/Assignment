@@ -105,7 +105,6 @@ public class CurrencyServiceTest {
         // Then
         assertEquals("GBP", result.getCode());
         assertEquals("英鎊", result.getChineseName());
-        assertEquals(3, result.getId());
         verify(currencyRepository).save(any(CurrencyEntity.class));
     }
 

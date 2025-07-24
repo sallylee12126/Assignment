@@ -186,4 +186,8 @@ public class CurrencyService {
         return new CurrencyRateModel(entity.getId(), entity.getCurrencyId(),
                 entity.getUpdateTime(), entity.getRate());
     }
+
+    public boolean exists(String code) {
+        return currencyRepository.findByCode(code).isPresent();
+    }
 }

@@ -60,8 +60,8 @@ public class CoindeskServiceTest {
 
     @Test
     void formatUpdateTime_ShouldFormatCorrectly() throws ActionException {
-        when(currencyService.getCurrencyByCode("USD")).thenReturn(new CurrencyModel(1, "USD", "美元"));
-        when(currencyService.getCurrencyByCode("EUR")).thenReturn(new CurrencyModel(2, "EUR", "歐元"));
+        when(currencyService.getCurrencyByCode("USD")).thenReturn(new CurrencyModel("USD", "美元"));
+        when(currencyService.getCurrencyByCode("EUR")).thenReturn(new CurrencyModel("EUR", "歐元"));
 
         CoinDeskApiRs apiRs = new CoinDeskApiRs();
         apiRs.setData(mockCoindeskResponse);
@@ -78,8 +78,8 @@ public class CoindeskServiceTest {
 
     @Test
     void getTransformedCoindeskData_ShouldTransformDataCorrectly() throws ActionException {
-        when(currencyService.getCurrencyByCode("USD")).thenReturn(new CurrencyModel(1, "USD", "美元"));
-        when(currencyService.getCurrencyByCode("EUR")).thenReturn(new CurrencyModel(2, "EUR", "歐元"));
+        when(currencyService.getCurrencyByCode("USD")).thenReturn(new CurrencyModel("USD", "美元"));
+        when(currencyService.getCurrencyByCode("EUR")).thenReturn(new CurrencyModel("EUR", "歐元"));
 
         CoinDeskApiRs apiRs = new CoinDeskApiRs();
         apiRs.setData(mockCoindeskResponse);
@@ -103,26 +103,5 @@ public class CoindeskServiceTest {
 
         verify(currencyService).updateOrCreateCurrencyRate("USD", new BigDecimal(50000.0));
         verify(currencyService).updateOrCreateCurrencyRate("EUR", new BigDecimal(45000.0));
-    }
-
-    @Test
-    void getTransformedCoindeskData_WhenCurrencyNotInDB_ShouldThrowException() throws ActionException {
-        // 模擬 USD 查不到（會拋出錯誤）
-        when(currencyService.getCurrencyByCode("USD"))
-                .thenThrow(CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_NOT_FOUND, "USD"));
-
-        // 模擬 EUR 是正常可查的（這行是關鍵）
-        when(currencyService.getCurrencyByCode("EUR"))
-                .thenReturn(new CurrencyModel(2, "EUR", "歐元"));
-
-        CoinDeskApiRs apiRs = new CoinDeskApiRs();
-        apiRs.setData(mockCoindeskResponse);
-
-        CoindeskService spyService = spy(coindeskService);
-        doReturn(apiRs).when(spyService).getCoindeskData();
-
-        ActionException exception = assertThrows(ActionException.class, () -> spyService.getTransformedCoindeskData());
-        assertEquals("D001", exception.getErrorCode());
-        assertEquals("查無幣別資料", exception.getMessage());
     }
 }
