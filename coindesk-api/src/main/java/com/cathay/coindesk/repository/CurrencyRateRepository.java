@@ -14,7 +14,7 @@ public interface CurrencyRateRepository extends JpaRepository<CurrencyRateEntity
 
     List<CurrencyRateEntity> findByCurrencyId(Integer currencyId);
 
-    @Query("SELECT cr FROM CurrencyRateEntity cr WHERE cr.currencyId = :currencyId ORDER BY cr.updateTime DESC")
+    @Query("SELECT c FROM CurrencyRateEntity c WHERE c.currencyId = :currencyId ORDER BY c.updateTime DESC")
     Optional<CurrencyRateEntity> findLatestByCurrencyId(@Param("currencyId") Integer currencyId);
 
     @Query("SELECT cr FROM CurrencyRateEntity cr ORDER BY cr.updateTime DESC")

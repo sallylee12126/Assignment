@@ -9,7 +9,7 @@ import com.cathay.coindesk.persistence.entity.CurrencyRateEntity;
 import com.cathay.coindesk.repository.CurrencyRateRepository;
 import com.cathay.coindesk.repository.CurrencyRepository;
 import com.cathay.coindesk.utils.CoinDeskUtils;
-import com.cathay.coindesk.validatior.CommonArgsValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 public class CurrencyService {
@@ -39,6 +40,25 @@ public class CurrencyService {
 
         return entities.stream()
                 .map(this::convertToModel)
+                .collect(Collectors.toList());
+    }
+
+    public List<CurrencyModel> getAllCurrenciesWithRate() throws ActionException {
+        List<CurrencyEntity> entities = currencyRepository.findAll();
+
+        if (entities == null || entities.isEmpty()) {
+            throw CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_NOT_FOUND, "幣別資料");
+        }
+
+        return entities.stream()
+                .map(entity -> {
+                    BigDecimal latestRate = currencyRateRepository
+                            .findLatestByCurrencyId(entity.getId())
+                            .map(CurrencyRateEntity::getRate)
+                            .orElse(null);
+
+                    return convertToModel(entity, latestRate);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -78,6 +98,21 @@ public class CurrencyService {
         return convertToModel(savedEntity);
     }
 
+    public CurrencyModel updateCurrencyByCode(String code, CurrencyModel model) throws ActionException {
+        CurrencyEntity entity = currencyRepository.findByCode(code)
+                .orElseThrow(() -> CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_NOT_FOUND, code));
+
+        if (!code.equals(model.getCode()) && currencyRepository.existsByCode(model.getCode())) {
+            throw CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_ALREADY_EXISTS, model.getCode());
+        }
+
+        entity.setCode(model.getCode());
+        entity.setChineseName(model.getChineseName());
+
+        CurrencyEntity savedEntity = currencyRepository.save(entity);
+        return convertToModel(savedEntity);
+    }
+
     public void deleteCurrency(Integer id) throws ActionException {
         if (!currencyRepository.existsById(id)) {
             throw CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_NOT_FOUND, id);
@@ -88,11 +123,29 @@ public class CurrencyService {
         currencyRepository.deleteById(id);
     }
 
-    // Currency Rate operations
-    public void updateCurrencyRate(String currencyCode, BigDecimal rate) throws ActionException {
-        CurrencyEntity currency = currencyRepository.findByCode(currencyCode)
-                .orElseThrow(() -> CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_NOT_FOUND, currencyCode));
+    public void deleteCurrencyByCode(String code) throws ActionException {
+        CurrencyEntity entity = currencyRepository.findByCode(code)
+                .orElseThrow(() -> CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_NOT_FOUND, code));
 
+        List<CurrencyRateEntity> rates = currencyRateRepository.findByCurrencyId(entity.getId());
+        currencyRateRepository.deleteAll(rates);
+        currencyRepository.delete(entity);
+    }
+
+    public void updateOrCreateCurrencyRate(String currencyCode, BigDecimal rate) {
+        Optional<CurrencyEntity> currencyOpt = currencyRepository.findByCode(currencyCode);
+
+        CurrencyEntity currency;
+        if (currencyOpt.isPresent()) {
+            currency = currencyOpt.get();
+        } else {
+            currency = new CurrencyEntity();
+            currency.setCode(currencyCode);
+            currency.setChineseName(currencyCode);
+            currency = currencyRepository.save(currency);
+        }
+
+        // 匯率永遠新增（不更新）
         CurrencyRateEntity rateEntity = CurrencyRateEntity.builder()
                 .currencyId(currency.getId())
                 .updateTime(LocalDateTime.now())
@@ -115,7 +168,11 @@ public class CurrencyService {
 
     // Conversion methods
     private CurrencyModel convertToModel(CurrencyEntity entity) {
-        return new CurrencyModel(entity.getId(), entity.getCode(), entity.getChineseName());
+        return new CurrencyModel(entity.getCode(), entity.getChineseName());
+    }
+
+    private CurrencyModel convertToModel(CurrencyEntity entity, BigDecimal rate) {
+        return new CurrencyModel(entity.getCode(), entity.getChineseName(), rate);
     }
 
     private CurrencyEntity convertToEntity(CurrencyModel model) {

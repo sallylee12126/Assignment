@@ -1,5 +1,6 @@
 package com.cathay.coindesk.service;
 
+import com.cathay.coindesk.api.data.impl.CoinDeskApiRs;
 import com.cathay.coindesk.dto.CoindeskResponseModel;
 import com.cathay.coindesk.dto.CurrencyModel;
 import com.cathay.coindesk.dto.TransformedResponseModel;
@@ -23,116 +24,105 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CoindeskServiceTest {
-    
+
     @Mock
     private CurrencyService currencyService;
-    
+
     @InjectMocks
     private CoindeskService coindeskService;
-    
+
     private CoindeskResponseModel mockCoindeskResponse;
-    
+
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(coindeskService, "coindeskApiUrl", 
-                "https://kengp3.github.io/blog/coindesk.json");
-        
-        // Create mock Coindesk response
+        ReflectionTestUtils.setField(coindeskService, "coindeskApiUrl", "https://kengp3.github.io/blog/coindesk.json");
+
         mockCoindeskResponse = new CoindeskResponseModel();
-        
+
         CoindeskResponseModel.TimeInfo timeInfo = new CoindeskResponseModel.TimeInfo();
-        timeInfo.setUpdatedISO("2024-01-01T10:00:00");
+        timeInfo.setUpdatedISO("2024-01-01T10:00:00Z");
         mockCoindeskResponse.setTime(timeInfo);
-        
+
         Map<String, CoindeskResponseModel.CurrencyInfo> bpi = new HashMap<>();
-        
+
         CoindeskResponseModel.CurrencyInfo usdInfo = new CoindeskResponseModel.CurrencyInfo();
         usdInfo.setCode("USD");
         usdInfo.setRateFloat(new BigDecimal(50000.0));
         bpi.put("USD", usdInfo);
-        
+
         CoindeskResponseModel.CurrencyInfo eurInfo = new CoindeskResponseModel.CurrencyInfo();
         eurInfo.setCode("EUR");
         eurInfo.setRateFloat(new BigDecimal(45000.0));
         bpi.put("EUR", eurInfo);
-        
+
         mockCoindeskResponse.setBpi(bpi);
     }
-    
+
     @Test
     void formatUpdateTime_ShouldFormatCorrectly() throws ActionException {
-        // This tests the private method through public method
-        when(currencyService.getCurrencyByCode("USD"))
-                .thenReturn(new CurrencyModel(1, "USD", "美元"));
-        when(currencyService.getCurrencyByCode("EUR"))
-                .thenReturn(new CurrencyModel(2, "EUR", "歐元"));
-        
-        // Mock the getCoindeskData method behavior
+        when(currencyService.getCurrencyByCode("USD")).thenReturn(new CurrencyModel(1, "USD", "美元"));
+        when(currencyService.getCurrencyByCode("EUR")).thenReturn(new CurrencyModel(2, "EUR", "歐元"));
+
+        CoinDeskApiRs apiRs = new CoinDeskApiRs();
+        apiRs.setData(mockCoindeskResponse);
+
         CoindeskService spyService = spy(coindeskService);
-        doReturn(mockCoindeskResponse).when(spyService).getCoindeskData();
-        
+        doReturn(apiRs).when(spyService).getCoindeskData();
+
         TransformedResponseModel result = spyService.getTransformedCoindeskData();
-        
+
         assertNotNull(result);
         assertNotNull(result.getUpdateTime());
         assertTrue(result.getUpdateTime().matches("\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}"));
     }
-    
+
     @Test
     void getTransformedCoindeskData_ShouldTransformDataCorrectly() throws ActionException {
-        when(currencyService.getCurrencyByCode("USD"))
-                .thenReturn(new CurrencyModel(1, "USD", "美元"));
-        when(currencyService.getCurrencyByCode("EUR"))
-                .thenReturn(new CurrencyModel(2, "EUR", "歐元"));
-        
+        when(currencyService.getCurrencyByCode("USD")).thenReturn(new CurrencyModel(1, "USD", "美元"));
+        when(currencyService.getCurrencyByCode("EUR")).thenReturn(new CurrencyModel(2, "EUR", "歐元"));
+
+        CoinDeskApiRs apiRs = new CoinDeskApiRs();
+        apiRs.setData(mockCoindeskResponse);
+
         CoindeskService spyService = spy(coindeskService);
-        doReturn(mockCoindeskResponse).when(spyService).getCoindeskData();
-        
-        // When
+        doReturn(apiRs).when(spyService).getCoindeskData();
+
         TransformedResponseModel result = spyService.getTransformedCoindeskData();
-        
-        // Then
+
         assertNotNull(result);
-        assertNotNull(result.getUpdateTime());
         assertEquals(2, result.getCurrencies().size());
-        
-        // Verify currency info
+
         TransformedResponseModel.CurrencyRateInfo usdInfo = result.getCurrencies().stream()
                 .filter(c -> "USD".equals(c.getCurrencyCode()))
-                .findFirst()
-                .orElse(null);
-        
+                .findFirst().orElse(null);
+
         assertNotNull(usdInfo);
         assertEquals("USD", usdInfo.getCurrencyCode());
         assertEquals("美元", usdInfo.getCurrencyChineseName());
-        assertEquals(50000.0, usdInfo.getRate());
-        
-        // Verify that currency rates were updated
-        verify(currencyService).updateCurrencyRate("USD", new BigDecimal(50000.0));
-        verify(currencyService).updateCurrencyRate("EUR", new BigDecimal(45000.0));
+        assertEquals(0, usdInfo.getRate().compareTo(BigDecimal.valueOf(50000)));
+
+        verify(currencyService).updateOrCreateCurrencyRate("USD", new BigDecimal(50000.0));
+        verify(currencyService).updateOrCreateCurrencyRate("EUR", new BigDecimal(45000.0));
     }
-    
+
     @Test
-    void getTransformedCoindeskData_WhenCurrencyNotInDB_ShouldUseDefaultName() throws ActionException {
+    void getTransformedCoindeskData_WhenCurrencyNotInDB_ShouldThrowException() throws ActionException {
+        // 模擬 USD 查不到（會拋出錯誤）
         when(currencyService.getCurrencyByCode("USD"))
                 .thenThrow(CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_NOT_FOUND, "USD"));
+
+        // 模擬 EUR 是正常可查的（這行是關鍵）
         when(currencyService.getCurrencyByCode("EUR"))
                 .thenReturn(new CurrencyModel(2, "EUR", "歐元"));
-        
+
+        CoinDeskApiRs apiRs = new CoinDeskApiRs();
+        apiRs.setData(mockCoindeskResponse);
+
         CoindeskService spyService = spy(coindeskService);
-        doReturn(mockCoindeskResponse).when(spyService).getCoindeskData();
-        
-        // When
-        TransformedResponseModel result = spyService.getTransformedCoindeskData();
-        
-        // Then
-        TransformedResponseModel.CurrencyRateInfo usdInfo = result.getCurrencies().stream()
-                .filter(c -> "USD".equals(c.getCurrencyCode()))
-                .findFirst()
-                .orElse(null);
-        
-        assertNotNull(usdInfo);
-        assertEquals("USD", usdInfo.getCurrencyCode());
-        assertEquals("未知貨幣", usdInfo.getCurrencyChineseName());
+        doReturn(apiRs).when(spyService).getCoindeskData();
+
+        ActionException exception = assertThrows(ActionException.class, () -> spyService.getTransformedCoindeskData());
+        assertEquals("D001", exception.getErrorCode());
+        assertEquals("查無幣別資料", exception.getMessage());
     }
 }

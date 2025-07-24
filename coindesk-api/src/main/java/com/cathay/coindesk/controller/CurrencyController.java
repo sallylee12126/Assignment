@@ -7,6 +7,7 @@ import com.cathay.coindesk.rest.RestStatus;
 import com.cathay.coindesk.service.CurrencyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -14,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/currencies")
+@RequestMapping("/api/currency")
 public class CurrencyController {
 
     @Autowired
@@ -23,16 +24,27 @@ public class CurrencyController {
     /**
      * 查詢所有幣別
      */
-    @GetMapping
+    @GetMapping("/currencies")
     public RestResult<List<CurrencyModel>> getAllCurrencies() throws ActionException {
         List<CurrencyModel> currencies = currencyService.getAllCurrencies();
         return new RestResult<>(RestStatus.SUCCESS, currencies);
     }
 
+
+    /**
+     * 查詢所有幣別(含匯率資料)
+     */
+    @GetMapping("/currenciesWithRates")
+    public RestResult<List<CurrencyModel>> getAllcurrenciesWithRates() throws ActionException {
+        List<CurrencyModel> currencies = currencyService.getAllCurrenciesWithRate();
+        return new RestResult<>(RestStatus.SUCCESS, currencies);
+    }
+
+
     /**
      * 根據 ID 查詢幣別
      */
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public RestResult<CurrencyModel> getCurrencyById(@PathVariable Integer id) throws ActionException {
         CurrencyModel currency = currencyService.getCurrencyById(id);
         return new RestResult<>(RestStatus.SUCCESS, currency);
@@ -57,20 +69,41 @@ public class CurrencyController {
     }
 
     /**
-     * 更新幣別
+     * 根據 code 更新幣別
      */
-    @PutMapping("/{id}")
-    public RestResult<CurrencyModel> updateCurrency(@PathVariable Integer id,
-                                                    @Valid @RequestBody CurrencyModel currencyModel) throws ActionException {
-        CurrencyModel updatedCurrency = currencyService.updateCurrency(id, currencyModel);
-        return new RestResult<>(RestStatus.SUCCESS, updatedCurrency);
+    @PutMapping("/code/{code}")
+    public RestResult<CurrencyModel> updateCurrencyByCode(@PathVariable String code,
+                                                          @Valid @RequestBody CurrencyModel model) throws ActionException {
+        CurrencyModel updated = currencyService.updateCurrencyByCode(code, model);
+        return new RestResult<>(RestStatus.SUCCESS, updated);
     }
 
     /**
-     * 刪除幣別
+     * 根據 code 刪除幣別
      */
-    @DeleteMapping("/{id}")
-    public RestResult<Void> deleteCurrency(@PathVariable Integer id) throws ActionException {
+    @DeleteMapping("/code/{code}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public RestResult<Void> deleteCurrencyByCode(@PathVariable String code) throws ActionException {
+        currencyService.deleteCurrencyByCode(code);
+        return new RestResult<>(RestStatus.SUCCESS, null);
+    }
+
+    /**
+     * 根據 id 更新幣別
+     */
+    @PutMapping("/id/{id}")
+    public RestResult<CurrencyModel> updateCurrencyById(@PathVariable Integer id,
+                                                        @Valid @RequestBody CurrencyModel model) throws ActionException {
+        CurrencyModel updated = currencyService.updateCurrency(id, model);
+        return new RestResult<>(RestStatus.SUCCESS, updated);
+    }
+
+    /**
+     * 根據 id 刪除幣別
+     */
+    @DeleteMapping("/id/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public RestResult<Void> deleteCurrencyById(@PathVariable Integer id) throws ActionException {
         currencyService.deleteCurrency(id);
         return new RestResult<>(RestStatus.SUCCESS, null);
     }

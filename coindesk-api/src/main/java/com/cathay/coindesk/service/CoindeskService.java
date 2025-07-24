@@ -74,11 +74,11 @@ public class CoindeskService {
                 String currencyCode = entry.getValue().getCode();
                 BigDecimal rate = entry.getValue().getRateFloat();
 
-                // Get Chinese name from database or use default
+                // Get Chinese name from database
                 String chineseName = getCurrencyChineseName(currencyCode);
 
                 // Update currency rate in database
-                currencyService.updateCurrencyRate(currencyCode, rate);
+                currencyService.updateOrCreateCurrencyRate(currencyCode, rate);
 
                 currencyInfoList.add(new TransformedResponseModel.CurrencyRateInfo(
                         currencyCode, chineseName, rate));
@@ -103,15 +103,14 @@ public class CoindeskService {
         }
     }
 
-    private String getCurrencyChineseName(String currencyCode) throws ActionException {
-        CurrencyModel model = currencyService.getCurrencyByCode(currencyCode);
-        String name = model.getChineseName();
-
-        if (StringUtils.isBlank(name)) {
-            throw CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_CH_ERROR, currencyCode);
+    private String getCurrencyChineseName(String currencyCode) {
+        try {
+            CurrencyModel model = currencyService.getCurrencyByCode(currencyCode);
+            String name = model.getChineseName();
+            return StringUtils.isNotBlank(name) ? name : currencyCode;
+        } catch (ActionException e) {
+            return currencyCode;
         }
-
-        return name;
     }
 
 }

@@ -160,8 +160,7 @@ public class CurrencyServiceTest {
         when(currencyRepository.existsById(999)).thenReturn(false);
         
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-                () -> currencyService.deleteCurrency(999));
-        assertEquals("Currency not found with id: 999", exception.getMessage());
+        ActionException exception = assertThrows(ActionException.class, () -> currencyService.deleteCurrency(999));
+        assertEquals("查無幣別資料", exception.getMessage());
     }
 }

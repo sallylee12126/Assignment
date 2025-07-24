@@ -32,23 +32,23 @@ public class CurrencyControllerTest {
     
     @Autowired
     private ObjectMapper objectMapper;
-    
+
     @Test
     void getAllCurrencies_ShouldReturnAllCurrencies() throws Exception {
         // Given
         CurrencyModel usd = new CurrencyModel(1, "USD", "美元");
         CurrencyModel eur = new CurrencyModel(2, "EUR", "歐元");
         when(currencyService.getAllCurrencies()).thenReturn(Arrays.asList(usd, eur));
-        
+
         // When & Then
         mockMvc.perform(get("/api/currencies"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].code").value("USD"))
-                .andExpect(jsonPath("$[0].chineseName").value("美元"))
-                .andExpect(jsonPath("$[1].code").value("EUR"))
-                .andExpect(jsonPath("$[1].chineseName").value("歐元"));
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].code").value("USD"))
+                .andExpect(jsonPath("$.data[0].chineseName").value("美元"))
+                .andExpect(jsonPath("$.data[1].code").value("EUR"))
+                .andExpect(jsonPath("$.data[1].chineseName").value("歐元"));
     }
     
     @Test
@@ -60,19 +60,19 @@ public class CurrencyControllerTest {
         // When & Then
         mockMvc.perform(get("/api/currencies/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.code").value("USD"))
-                .andExpect(jsonPath("$.chineseName").value("美元"));
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.code").value("USD"))
+                .andExpect(jsonPath("$.data.chineseName").value("美元"));
     }
     
     @Test
-    void getCurrencyById_WhenNotExists_ShouldReturn404() throws Exception {
+    void getCurrencyById_WhenNotExists_ShouldReturn400() throws Exception {
         // Given
         when(currencyService.getCurrencyById(999)).thenThrow(CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_NOT_FOUND, ""));
         
         // When & Then
         mockMvc.perform(get("/api/currencies/999"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
     }
     
     @Test
@@ -86,10 +86,10 @@ public class CurrencyControllerTest {
         mockMvc.perform(post("/api/currencies")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(inputDto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(3))
-                .andExpect(jsonPath("$.code").value("GBP"))
-                .andExpect(jsonPath("$.chineseName").value("英鎊"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(3))
+                .andExpect(jsonPath("$.data.code").value("GBP"))
+                .andExpect(jsonPath("$.data.chineseName").value("英鎊"));
     }
     
     @Test
@@ -116,9 +116,9 @@ public class CurrencyControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(inputDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.code").value("USD"))
-                .andExpect(jsonPath("$.chineseName").value("美金"));
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.code").value("USD"))
+                .andExpect(jsonPath("$.data.chineseName").value("美金"));
     }
     
     @Test
