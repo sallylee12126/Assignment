@@ -10,6 +10,40 @@
 - 幣別中英文對照資料表 CRUD
 - 完整單元與整合測試
 
+## 專案結構
+```
+CoinDesk-API/
+├── Assignment.Cathay.json             # Postman 測試腳本
+├── coindesk-api/                      # Spring Boot 專案根目錄
+│   ├── pom.xml                        # Maven 設定檔
+│   ├── README.md                      # 專案說明
+│   ├── create_gitignore.sh            # 自動生成 .gitignore 腳本
+│   ├── target/                        # Maven 編譯輸出目錄
+│   └── src/
+│       ├── main/
+│       │   ├── java/
+│       │   │   └── com/cathay/coindesk/
+│       │   │       ├── api/data/           # API 資料模型
+│       │   │       ├── constant/           # 常數定義
+│       │   │       ├── controller/         # REST 控制器
+│       │   │       ├── dto/                # 資料傳輸物件
+│       │   │       ├── error/              # 錯誤模型
+│       │   │       ├── exception/          # 自訂 Exception
+│       │   │       ├── persistence/entity/ # JPA 實體類別
+│       │   │       ├── repository/         # JPA Repository 介面
+│       │   │       ├── rest/               # 共用回應格式 (RestResult, RestStatus)
+│       │   │       ├── service/            # 服務邏輯 (CoindeskService, CurrencyService)
+│       │   │       ├── utils/              # 工具類別
+│       │   │       ├── validator/          # 驗證邏輯
+│       │   │       └── CoindeskApiApplication.java # 主啟動類
+│       │   └── resources/
+│       │       ├── application.yml         # Spring Boot 設定
+│       │       ├── data.sql                # 初始化資料
+│       │       └── schema.sql              # 資料庫結構
+│       └── test/                           # 單元與整合測試
+└── .gitignore
+```
+
 ## CoinDesk JSON 範例
 
 ```json
@@ -46,3 +80,8 @@
   }
 }
 ```
+
+
+## Postman測試檔
+- 已包含：`Assignment.Cathay.json`
+- 可透過 Postman → Import → JSON 檔案，來載入所有 requests。
