@@ -53,7 +53,7 @@ public class CurrencyService {
         return entities.stream()
                 .map(entity -> {
                     BigDecimal latestRate = currencyRateRepository
-                            .findLatestByCurrencyId(entity.getId())
+                            .findTopByCurrencyIdOrderByUpdateTimeDesc(entity.getId())
                             .map(CurrencyRateEntity::getRate)
                             .orElse(null);
 
@@ -161,7 +161,7 @@ public class CurrencyService {
     }
 
     public CurrencyRateModel getLatestCurrencyRate(Integer currencyId) throws ActionException {
-        CurrencyRateEntity rateEntity = currencyRateRepository.findLatestByCurrencyId(currencyId)
+        CurrencyRateEntity rateEntity = currencyRateRepository.findTopByCurrencyIdOrderByUpdateTimeDesc(currencyId)
                 .orElseThrow(() -> CoinDeskUtils.newActionException(CoinDeskErrorCode.CURRENCY_RATE_NOT_FOUND, currencyId));
         return convertRateToModel(rateEntity);
     }
