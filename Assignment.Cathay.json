@@ -1,0 +1,277 @@
+{
+	"info": {
+		"_postman_id": "95d713d8-ea13-42ad-b24b-8fee6c212c96",
+		"name": "Assignment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14033844"
+	},
+	"item": [
+		{
+			"name": "Cathay",
+			"item": [
+				{
+					"name": "新增幣別",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"TWD\",\n    \"chineseName\": \"新台幣\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/currency/create",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"currency",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "更新幣別(by code）",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"TWD\",\n    \"chineseName\": \"新台幣\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/currency/code/TWD",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"currency",
+								"code",
+								"TWD"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "更新幣別(by id)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"TWD\",\n    \"chineseName\": \"新台幣\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/currency/id/1",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"currency",
+								"id",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查詢幣別(by id)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/currency/id/2",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"currency",
+								"id",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查詢幣別(by code)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/currency/code/USD",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"currency",
+								"code",
+								"USD"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "刪除幣別(by code)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/currency/code/EUR",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"currency",
+								"code",
+								"EUR"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查詢所有幣別資料",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/currency/currencies",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"currency",
+								"currencies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查詢所有幣別資料(包含匯率)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/currency/currenciesWithRates",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"currency",
+								"currenciesWithRates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查詢轉換後匯率資料",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/coindesk/transformed",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"coindesk",
+								"transformed"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "查詢原始匯率資料",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/coindesk/original",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"coindesk",
+								"original"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
